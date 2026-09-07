@@ -391,19 +391,19 @@ function renderItemForm(m) {
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">産地(国)</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：エチオピア" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：Ethiopia" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">農園 / 茶園</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：コチェレ農園" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：Kochere" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">精製方法</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：ウォッシュド" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：Washed" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎所 / 販売元</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：Acid Coffee" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：ETHICUS" />' +
         '</label>' +
       '</div>' +
       '<label style="display: flex; flex-direction: column; gap: 6px;">' +
@@ -418,7 +418,7 @@ function renderItemForm(m) {
       ) +
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
-          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎日(任意)</span>' +
+          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎日</span>' +
           '<input type="date" class="bt-input" value="' + escapeHtml(d.roastDate) + '" onchange="state.modal.draft.roastDate = this.value" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
