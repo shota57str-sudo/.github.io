@@ -22,7 +22,8 @@ const SVGS = {
   expand_more: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>',
   add_box: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>',
   download: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
-  upload: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>'
+  upload: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>',
+  label: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/></svg>'
 };
 
 // --- STATE MANAGEMENT ---
@@ -38,7 +39,7 @@ function daysSince(dateStr) {
   return Math.floor((Date.now() - d.getTime()) / 86400000);
 }
 function emptyDraft(type) {
-  return { type: type || "coffee", name: "", country: "", farm: "", process: "", roaster: "",
+  return { type: type || "coffee", name: "", country: "", farm: "", variety: "", process: "", roaster: "",
     flavor: "", totalWeight: "", roastDate: "", purchaseDate: todayStr(), notes: "" };
 }
 
@@ -126,7 +127,7 @@ function addItem(draft) {
   const total = Math.max(0, Number(draft.totalWeight) || 0);
   const newItem = {
     id: uid(), type: draft.type, name: draft.name.trim(), country: draft.country.trim(),
-    farm: draft.farm.trim(), process: draft.process.trim(), roaster: draft.roaster.trim(),
+    farm: draft.farm.trim(), variety: draft.variety.trim(), process: draft.process.trim(), roaster: draft.roaster.trim(),
     flavor: draft.flavor.trim(), totalWeight: total, remaining: total,
     roastDate: draft.roastDate || "", purchaseDate: draft.purchaseDate || todayStr(),
     notes: draft.notes.trim(), archived: false, createdAt: Date.now(),
@@ -137,7 +138,7 @@ function editItem(id, draft) {
   persist(state.items.map(function(it) {
     return it.id === id ? Object.assign({}, it, {
       type: draft.type, name: draft.name.trim(), country: draft.country.trim(),
-      farm: draft.farm.trim(), process: draft.process.trim(), roaster: draft.roaster.trim(),
+      farm: draft.farm.trim(), variety: draft.variety.trim(), process: draft.process.trim(), roaster: draft.roaster.trim(),
       flavor: draft.flavor.trim(), roastDate: draft.roastDate || "",
       purchaseDate: draft.purchaseDate, notes: draft.notes.trim()
     }) : it;
@@ -190,7 +191,7 @@ function render() {
     if (state.typeFilter !== "all" && it.type !== state.typeFilter) return false;
     if (state.query.trim()) {
       const q = state.query.trim().toLowerCase();
-      const hay = [it.name, it.country, it.farm, it.process, it.roaster, it.flavor].join(" ").toLowerCase();
+      const hay = [it.name, it.country, it.farm, it.variety, it.process, it.roaster, it.flavor].join(" ").toLowerCase();
       if (hay.indexOf(q) === -1) return false;
     }
     return true;
@@ -267,7 +268,7 @@ function renderHeader(stats) {
     '<div style="max-width: 780px; margin: 0 auto; padding: 32px 16px 20px;">' +
       '<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">' +
         '<div>' +
-          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">コーヒー豆とお茶のリスト</h1>' +
+          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">豆と茶のリスト</h1>' +
           '<p style="margin-top: 4px; font-size: 14px; color: #8A7C68;">' +
             'コーヒー ' + stats.coffee + ' 種・茶 ' + stats.tea + ' 種を保管中' +
             (stats.low > 0 ? '<span style="color: #7A2E27;"> ・残りわずか ' + stats.low + ' 件</span>' : '') +
@@ -283,7 +284,7 @@ function renderHeader(stats) {
       '</div>' +
       '<div style="margin-top: 20px; position: relative; max-width: 340px;">' +
         '<span style="position: absolute; left: 12px; top: 9px; color: #8A7C68;">' + SVGS.search + '</span>' +
-        '<input value="' + escapeHtml(state.query) + '" oninput="handleSearchInput(this.value)" placeholder="名前・産地・農園・焙煎所で検索"' +
+        '<input value="' + escapeHtml(state.query) + '" oninput="handleSearchInput(this.value)" placeholder="名前・産地・農園・品種・焙煎所で検索"' +
           ' class="bt-input" style="padding-left: 36px;" />' +
       '</div>' +
     '</div>' +
@@ -294,7 +295,7 @@ function handleSearchInput(val) { state.query = val; }
 
 function renderToolbar() {
   const types = [{ v: "all", l: "すべて" }, { v: "coffee", l: "コーヒー" }, { v: "tea", l: "茶" }];
-  const groupings = [{ v: "all", l: "一覧" }, { v: "country", l: "国別" }, { v: "process", l: "精製方法別" }, { v: "farm", l: "農園別" }, { v: "roaster", l: "焙煎所別" }];
+  const groupings = [{ v: "all", l: "一覧" }, { v: "country", l: "国別" }, { v: "variety", l: "品種別" }, { v: "process", l: "精製方法別" }, { v: "farm", l: "農園別" }, { v: "roaster", l: "焙煎所別" }];
   
   let html = '<div style="padding-top: 20px; display: flex; flex-direction: column; gap: 12px;">' +
     '<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">' +
@@ -345,6 +346,7 @@ function renderItemCard(item) {
   const rows = [
     { svg: SVGS.location, v: item.country },
     { svg: SVGS.eco, v: item.farm },
+    { svg: SVGS.label, v: item.variety },
     { svg: SVGS.fire, v: item.process },
     { svg: SVGS.store, v: item.roaster }
   ].filter(function(r) { return r.v; });
@@ -460,14 +462,18 @@ function renderItemForm(m) {
           '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：コチェレ農園" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
+          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">品種</span>' +
+          '<input class="bt-input" value="' + escapeHtml(d.variety) + '" oninput="state.modal.draft.variety = this.value" placeholder="例：ゲイシャ, ゲシャ" />' +
+        '</label>' +
+        '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">精製方法</span>' +
           '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：ウォッシュド" />' +
         '</label>' +
-        '<label style="display: flex; flex-direction: column; gap: 6px;">' +
-          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎所 / 販売元</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：Acid Coffee" />' +
-        '</label>' +
       '</div>' +
+      '<label style="display: flex; flex-direction: column; gap: 6px;">' +
+        '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎所 / 販売元</span>' +
+        '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：Acid Coffee" />' +
+      '</label>' +
       '<label style="display: flex; flex-direction: column; gap: 6px;">' +
         '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">フレーバー・テイスティングノート</span>' +
         '<input class="bt-input" value="' + escapeHtml(d.flavor) + '" oninput="state.modal.draft.flavor = this.value" placeholder="例：ベルガモット、はちみつ、ジャスミン" />' +
@@ -614,7 +620,7 @@ function openModal(mode, itemId) {
     modalData.draft = emptyDraft();
   } else if (mode === "edit" && item) {
     modalData.draft = {
-      type: item.type, name: item.name, country: item.country, farm: item.farm,
+      type: item.type, name: item.name, country: item.country, farm: item.farm, variety: item.variety || "",
       process: item.process, roaster: item.roaster, flavor: item.flavor,
       roastDate: item.roastDate || "", purchaseDate: item.purchaseDate, notes: item.notes
     };
