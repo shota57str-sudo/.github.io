@@ -1,3 +1,6 @@
+// --- GAS API ENDPOINT ---
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxgGRFYAyzT18-f6ZgZQ4WvR1SCCWqmamjYkpEtMARUZu7917SWkvXu_6hGQldj_1JClg/exec";
+
 // --- ICON SVG DATA ---
 const SVGS = {
   add: '<svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>',
@@ -39,19 +42,24 @@ function emptyDraft(type) {
     flavor: "", totalWeight: "", roastDate: "", purchaseDate: todayStr(), notes: "" };
 }
 
-function loadItems() {
+// クラウド（GAS）から読み込み
+async function loadItemsFromCloud() {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) { return []; }
-}
-function saveItems(items) {
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
-  catch (e) { console.error("保存に失敗しました", e); }
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error("クラウドデータの読み込み失敗:", e);
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) { return []; }
+  }
 }
 
 let state = {
-  items: loadItems(),
+  items: [],
+  isLoading: true,
   typeFilter: "all",
   groupMode: "all",
   tab: "active",
@@ -64,10 +72,19 @@ function setState(updater) {
   state = Object.assign({}, state, updater);
   render();
 }
+
 function persist(nextItems) {
   state.items = nextItems;
-  saveItems(nextItems);
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextItems)); } catch (e) {}
   render();
+
+  // バックグラウンドでGASへ自動送信保存
+  fetch(GAS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(nextItems)
+  }).catch(err => console.error("クラウド保存失敗:", err));
 }
 
 // --- BACKUP FUNCTIONS ---
@@ -162,6 +179,11 @@ function render() {
   const app = document.getElementById("root");
   if (!app) return;
 
+  if (state.isLoading) {
+    app.innerHTML = '<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #8A7C68;">データを取得中...</div>';
+    return;
+  }
+
   const filtered = state.items.filter(function(it) {
     if (state.tab === "active" && it.archived) return false;
     if (state.tab === "archived" && !it.archived) return false;
@@ -245,7 +267,7 @@ function renderHeader(stats) {
     '<div style="max-width: 780px; margin: 0 auto; padding: 32px 16px 20px;">' +
       '<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">' +
         '<div>' +
-          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">コーヒー豆とお茶のリスト</h1>' +
+          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">豆と茶のリスト</h1>' +
           '<p style="margin-top: 4px; font-size: 14px; color: #8A7C68;">' +
             'コーヒー ' + stats.coffee + ' 種・茶 ' + stats.tea + ' 種を保管中' +
             (stats.low > 0 ? '<span style="color: #7A2E27;"> ・残りわずか ' + stats.low + ' 件</span>' : '') +
@@ -690,5 +712,10 @@ function confirmAdjustRestock() {
   closeModal();
 }
 
-// Initial Render
+// Initial Load & Render
 render();
+loadItemsFromCloud().then(function(items) {
+  state.items = items;
+  state.isLoading = false;
+  render();
+});
