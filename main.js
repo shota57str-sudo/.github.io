@@ -461,47 +461,47 @@ function renderItemForm(m) {
       '</div>' +
       '<label style="display: flex; flex-direction: column; gap: 6px;">' +
         '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">名前</span>' +
-        '<input class="bt-input" value="' + escapeHtml(d.name) + '" oninput="state.modal.draft.name = this.value" placeholder="例：エチオピア イルガチェフェ" />' +
+        '<input class="bt-input" value="' + escapeHtml(d.name) + '" oninput="state.modal.draft.name = this.value" placeholder="例：El Diviso" />' +
       '</label>' +
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">産地(国)</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：エチオピア" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：Colombia" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">産地(地域/Region)</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.region) + '" oninput="state.modal.draft.region = this.value" placeholder="例：イルガチェフェ, ウーラガ" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.region) + '" oninput="state.modal.draft.region = this.value" placeholder="例：Pitalito, Huila" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">農園 / 茶園</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：コチェレ農園" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：Nestor Lasso" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">品種</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.variety) + '" oninput="state.modal.draft.variety = this.value" placeholder="例：ゲイシャ, ゲシャ" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.variety) + '" oninput="state.modal.draft.variety = this.value" placeholder="例：Ombligon" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">精製方法</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：ウォッシュド" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：Anaerobic Natura" />' +
         '</label>' +
       '</div>' +
       '<label style="display: flex; flex-direction: column; gap: 6px;">' +
         '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎所 / 販売元</span>' +
-        '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：Acid Coffee" />' +
+        '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：ETHICUS" />' +
       '</label>' +
       '<label style="display: flex; flex-direction: column; gap: 6px;">' +
         '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">フレーバー・テイスティングノート</span>' +
-        '<input class="bt-input" value="' + escapeHtml(d.flavor) + '" oninput="state.modal.draft.flavor = this.value" placeholder="例：ベルガモット、はちみつ、ジャスミン" />' +
+        '<input class="bt-input" value="' + escapeHtml(d.flavor) + '" oninput="state.modal.draft.flavor = this.value" placeholder="例：Doctor Pepper, Bubble gum, Jelly Beans, RaspBerry, Peach" />' +
       '</label>' +
       (isAdd ?
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">購入量(g)</span>' +
-          '<input type="number" min="0" class="bt-input" value="' + escapeHtml(d.totalWeight) + '" oninput="state.modal.draft.totalWeight = this.value" placeholder="例：200" />' +
+          '<input type="number" min="0" class="bt-input" value="' + escapeHtml(d.totalWeight) + '" oninput="state.modal.draft.totalWeight = this.value" placeholder="例：100" />' +
         '</label>' : ''
       ) +
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
-          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎日(任意)</span>' +
+          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎日</span>' +
           '<input type="date" class="bt-input" value="' + escapeHtml(d.roastDate) + '" onchange="state.modal.draft.roastDate = this.value" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
