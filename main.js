@@ -209,7 +209,7 @@ function renderHeader(stats) {
     '<div style="max-width: 780px; margin: 0 auto; padding: 32px 16px 20px;">' +
       '<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">' +
         '<div>' +
-          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">豆と茶の棚</h1>' +
+          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">豆と茶のリスト</h1>' +
           '<p style="margin-top: 4px; font-size: 14px; color: #8A7C68;">' +
             'コーヒー ' + stats.coffee + ' 種・茶 ' + stats.tea + ' 種を保管中' +
             (stats.low > 0 ? '<span style="color: #7A2E27;"> ・残りわずか ' + stats.low + ' 件</span>' : '') +
