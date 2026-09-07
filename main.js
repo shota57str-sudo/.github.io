@@ -7,7 +7,7 @@ const SVGS = {
   search: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>',
   coffee: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M2 21h18v-2H2v2zm2-4h12V3H4v14zm14-12v7h2c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-2zm0 5v-3h2v3h-2z"/></svg>',
   water_drop: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
-  location: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
+  location: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5-2.5z"/></svg>',
   eco: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M6.05 8.05c-2.73 2.73-2.73 7.15 0 9.88 2.73 2.73 7.15 2.73 9.88 0 2.73-2.73 2.73-7.15 0-9.88l-9.88 9.88zM16 6l-1.41 1.41 2.58 2.59H11v2h6.17l-2.58 2.59L16 16l5-5z"/></svg>',
   fire: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M13.5 1.5c0 0-3.5 3.5-3.5 7.5 0 1.28.41 2.46 1.1 3.44C10.1 11.53 9.5 10.1 9.5 8.5c0-1.78.71-3.39 1.86-4.57C8.16 5.09 6 7.79 6 11c0 4.42 3.58 8 8 8s8-3.58 8-8c0-5.18-5.34-8.73-8.5-9.5z"/></svg>',
   store: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>',
@@ -39,7 +39,7 @@ function daysSince(dateStr) {
   return Math.floor((Date.now() - d.getTime()) / 86400000);
 }
 function emptyDraft(type) {
-  return { type: type || "coffee", name: "", country: "", farm: "", variety: "", process: "", roaster: "",
+  return { type: type || "coffee", name: "", country: "", region: "", farm: "", variety: "", process: "", roaster: "",
     flavor: "", totalWeight: "", roastDate: "", purchaseDate: todayStr(), notes: "" };
 }
 
@@ -126,7 +126,7 @@ function importData(event) {
 function addItem(draft) {
   const total = Math.max(0, Number(draft.totalWeight) || 0);
   const newItem = {
-    id: uid(), type: draft.type, name: draft.name.trim(), country: draft.country.trim(),
+    id: uid(), type: draft.type, name: draft.name.trim(), country: draft.country.trim(), region: draft.region.trim(),
     farm: draft.farm.trim(), variety: draft.variety.trim(), process: draft.process.trim(), roaster: draft.roaster.trim(),
     flavor: draft.flavor.trim(), totalWeight: total, remaining: total,
     roastDate: draft.roastDate || "", purchaseDate: draft.purchaseDate || todayStr(),
@@ -137,7 +137,7 @@ function addItem(draft) {
 function editItem(id, draft) {
   persist(state.items.map(function(it) {
     return it.id === id ? Object.assign({}, it, {
-      type: draft.type, name: draft.name.trim(), country: draft.country.trim(),
+      type: draft.type, name: draft.name.trim(), country: draft.country.trim(), region: draft.region.trim(),
       farm: draft.farm.trim(), variety: draft.variety.trim(), process: draft.process.trim(), roaster: draft.roaster.trim(),
       flavor: draft.flavor.trim(), roastDate: draft.roastDate || "",
       purchaseDate: draft.purchaseDate, notes: draft.notes.trim()
@@ -191,7 +191,8 @@ function render() {
     if (state.typeFilter !== "all" && it.type !== state.typeFilter) return false;
     if (state.query.trim()) {
       const q = state.query.trim().toLowerCase();
-      const hay = [it.name, it.country, it.farm, it.variety, it.process, it.roaster, it.flavor].join(" ").toLowerCase();
+      // regionも検索対象に含める
+      const hay = [it.name, it.country, it.region, it.farm, it.variety, it.process, it.roaster, it.flavor].join(" ").toLowerCase();
       if (hay.indexOf(q) === -1) return false;
     }
     return true;
@@ -284,7 +285,7 @@ function renderHeader(stats) {
       '</div>' +
       '<div style="margin-top: 20px; position: relative; max-width: 340px;">' +
         '<span style="position: absolute; left: 12px; top: 9px; color: #8A7C68;">' + SVGS.search + '</span>' +
-        '<input value="' + escapeHtml(state.query) + '" oninput="handleSearchInput(this.value)" placeholder="名前・産地・農園・品種・焙煎所で検索"' +
+        '<input value="' + escapeHtml(state.query) + '" oninput="handleSearchInput(this.value)" placeholder="名前・国・地域・農園・品種・焙煎所で検索"' +
           ' class="bt-input" style="padding-left: 36px;" />' +
       '</div>' +
     '</div>' +
@@ -295,7 +296,16 @@ function handleSearchInput(val) { state.query = val; }
 
 function renderToolbar() {
   const types = [{ v: "all", l: "すべて" }, { v: "coffee", l: "コーヒー" }, { v: "tea", l: "茶" }];
-  const groupings = [{ v: "all", l: "一覧" }, { v: "country", l: "国別" }, { v: "variety", l: "品種別" }, { v: "process", l: "精製方法別" }, { v: "farm", l: "農園別" }, { v: "roaster", l: "焙煎所別" }];
+  // 「地域別(region)」のグループボタンも用意
+  const groupings = [
+    { v: "all", l: "一覧" },
+    { v: "country", l: "国別" },
+    { v: "region", l: "地域別" },
+    { v: "variety", l: "品種別" },
+    { v: "process", l: "精製方法別" },
+    { v: "farm", l: "農園別" },
+    { v: "roaster", l: "焙煎所別" }
+  ];
   
   let html = '<div style="padding-top: 20px; display: flex; flex-direction: column; gap: 12px;">' +
     '<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">' +
@@ -343,6 +353,7 @@ function renderItemCard(item) {
   const empty = item.remaining <= 0;
   const archived = state.tab === "archived";
 
+  // 一覧表示からは region を除外し、country のみを表示します
   const rows = [
     { svg: SVGS.location, v: item.country },
     { svg: SVGS.eco, v: item.farm },
@@ -456,6 +467,10 @@ function renderItemForm(m) {
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">産地(国)</span>' +
           '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：エチオピア" />' +
+        '</label>' +
+        '<label style="display: flex; flex-direction: column; gap: 6px;">' +
+          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">産地(地域/Region)</span>' +
+          '<input class="bt-input" value="' + escapeHtml(d.region) + '" oninput="state.modal.draft.region = this.value" placeholder="例：イルガチェフェ, ウーラガ" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">農園 / 茶園</span>' +
@@ -620,7 +635,7 @@ function openModal(mode, itemId) {
     modalData.draft = emptyDraft();
   } else if (mode === "edit" && item) {
     modalData.draft = {
-      type: item.type, name: item.name, country: item.country, farm: item.farm, variety: item.variety || "",
+      type: item.type, name: item.name, country: item.country, region: item.region || "", farm: item.farm, variety: item.variety || "",
       process: item.process, roaster: item.roaster, flavor: item.flavor,
       roastDate: item.roastDate || "", purchaseDate: item.purchaseDate, notes: item.notes
     };
