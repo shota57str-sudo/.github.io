@@ -17,7 +17,9 @@ const SVGS = {
   close: '<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
   chevron_right: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>',
   expand_more: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>',
-  add_box: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>'
+  add_box: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>',
+  download: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
+  upload: '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>'
 };
 
 // --- STATE MANAGEMENT ---
@@ -45,7 +47,7 @@ function loadItems() {
 }
 function saveItems(items) {
   try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
-  catch (e) { console.error("保存に失敗しました。", e); }
+  catch (e) { console.error("保存に失敗しました", e); }
 }
 
 let state = {
@@ -66,6 +68,40 @@ function persist(nextItems) {
   state.items = nextItems;
   saveItems(nextItems);
   render();
+}
+
+// --- BACKUP FUNCTIONS ---
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.items, null, 2));
+  const downloadAnchor = document.createElement('a');
+  const fileName = `bean_tea_backup_${todayStr()}.json`;
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", fileName);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function importData(event) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedItems = JSON.parse(e.target.result);
+      if (Array.isArray(importedItems)) {
+        if (confirm("現在のデータが上書きされます。復元を実行しますか？")) {
+          persist(importedItems);
+          alert("データを復元しました！");
+        }
+      } else {
+        alert("無効なファイル形式です。");
+      }
+    } catch (err) {
+      alert("ファイルの読み込みに失敗しました。");
+    }
+  };
+  if (event.target.files && event.target.files[0]) {
+    reader.readAsText(event.target.files[0]);
+  }
 }
 
 // --- ACTIONS ---
@@ -209,15 +245,19 @@ function renderHeader(stats) {
     '<div style="max-width: 780px; margin: 0 auto; padding: 32px 16px 20px;">' +
       '<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">' +
         '<div>' +
-          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">コーヒー豆と茶のリスト</h1>' +
+          '<h1 class="bt-display" style="font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em;">豆と茶のリスト</h1>' +
           '<p style="margin-top: 4px; font-size: 14px; color: #8A7C68;">' +
             'コーヒー ' + stats.coffee + ' 種・茶 ' + stats.tea + ' 種を保管中' +
             (stats.low > 0 ? '<span style="color: #7A2E27;"> ・残りわずか ' + stats.low + ' 件</span>' : '') +
           '</p>' +
         '</div>' +
-        '<button onclick="openModal(\'add\')" style="display: flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 999px; background: #2B2018; color: #EEE7D8; font-weight: 500; border: none; cursor: pointer;">' +
-          SVGS.add + '新しい豆・茶を登録' +
-        '</button>' +
+        '<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">' +
+          '<button onclick="exportData()" class="bt-btn" style="display: flex; align-items: center; gap: 4px;" title="JSONファイルで保存">' + SVGS.download + 'バックアップ</button>' +
+          '<label class="bt-btn" style="display: flex; align-items: center; gap: 4px; cursor: pointer;" title="JSONファイルから復元">' + SVGS.upload + '復元<input type="file" accept=".json" onchange="importData(event)" style="display: none;" /></label>' +
+          '<button onclick="openModal(\'add\')" style="display: flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 999px; background: #2B2018; color: #EEE7D8; font-weight: 500; border: none; cursor: pointer;">' +
+            SVGS.add + '新規登録' +
+          '</button>' +
+        '</div>' +
       '</div>' +
       '<div style="margin-top: 20px; position: relative; max-width: 340px;">' +
         '<span style="position: absolute; left: 12px; top: 9px; color: #8A7C68;">' + SVGS.search + '</span>' +
@@ -391,19 +431,19 @@ function renderItemForm(m) {
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">産地(国)</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：Ethiopia" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.country) + '" oninput="state.modal.draft.country = this.value" placeholder="例：エチオピア" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">農園 / 茶園</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：Kochere" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.farm) + '" oninput="state.modal.draft.farm = this.value" placeholder="例：コチェレ農園" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">精製方法</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：Washed" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.process) + '" oninput="state.modal.draft.process = this.value" placeholder="例：ウォッシュド" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
           '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎所 / 販売元</span>' +
-          '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：ETHICUS" />' +
+          '<input class="bt-input" value="' + escapeHtml(d.roaster) + '" oninput="state.modal.draft.roaster = this.value" placeholder="例：Acid Coffee" />' +
         '</label>' +
       '</div>' +
       '<label style="display: flex; flex-direction: column; gap: 6px;">' +
@@ -418,7 +458,7 @@ function renderItemForm(m) {
       ) +
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
-          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎日</span>' +
+          '<span style="font-size: 14px; color: #8A7C68; font-weight: 500;">焙煎日(任意)</span>' +
           '<input type="date" class="bt-input" value="' + escapeHtml(d.roastDate) + '" onchange="state.modal.draft.roastDate = this.value" />' +
         '</label>' +
         '<label style="display: flex; flex-direction: column; gap: 6px;">' +
